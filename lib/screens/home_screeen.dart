@@ -48,7 +48,7 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Scaffold(
         backgroundColor: Colors.white,
         body: _postsList.isEmpty
-            ? const Center(child: Text("No posts yet."))
+            ? const Center(child: Text("No reports yet."))
             : ListView.builder(
                 padding: const EdgeInsets.all(8),
                 itemCount: _postsList.length,
@@ -180,7 +180,7 @@ class _AddEntryFormState extends State<_AddEntryForm> {
           mainAxisSize: MainAxisSize.min,
           children: [
             const Text(
-              "New Post",
+              "New Report",
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
