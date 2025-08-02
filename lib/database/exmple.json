@@ -1,0 +1,51 @@
+{
+    "users": [
+        {
+            "user_id": "yacinebekheddouma@gmail",
+            "id_card": "100001023125612",
+            "first_name": "YACINE",
+            "last_name": "Bekh",
+            "pfp": "/link to pic",
+            "posts": ["post_001"],
+            "groups":["group1"],
+            "wilaya": "chlef"
+        },
+        {
+            "user_id": "0560151032",
+            "first_name": "Anis",
+            "last_name": "KBB",
+            "pfp": "/link to pic",
+            "posts": ["post_001"],
+            "wilaya": "tlemcen"
+        }
+    ],
+    "posts": [
+        {
+            "post_id": "post_001",
+            "user_id": "yacinebekheddouma@gmail",
+            "wilaya": "chlef",
+            "work_day": 1,
+            "title": "popel f 7arach",
+            "geolocal": {
+                "lat": 120.210021,
+                "lng": 46.5411
+            },
+            "description": "kayn poubel f 7arach ey",
+            "pictures": ["link1", "link2"],
+            "max_nbr": 6,
+            "status": "solved"
+        }
+    ],
+    "wilayas": [
+        {
+            "id": "util_1",
+            "name": "tshapa",
+            "lidaha": "yacinebekheddouma@gmail"
+        },
+        {
+            "id": "util_2",
+            "name": "les gons",
+            "lidaha": "yacinebekheddouma@gmail"
+        }
+    ]
+}
