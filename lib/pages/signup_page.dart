@@ -34,34 +34,34 @@ class _SignupPageState extends State<SignupPage> {
       body: SafeArea(
         child: Center(
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(16.0),
             child: Column(
               children: [
                 Image.asset("assets/images/logo.png", width: 300),
+
                 const SizedBox(height: 24),
+
                 Expanded(
                   child: SingleChildScrollView(
                     child: Form(
                       key: _formKey,
                       child: Column(
                         children: [
-                          SizedBox(
+                          Container(
                             width: 300,
                             child: TextFormField(
                               controller: _emailOrPhoneController,
                               decoration: const InputDecoration(
                                 labelText: 'Email or Phone',
                               ),
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Required field';
-                                }
-                                return null;
-                              },
+                              validator: (value) =>
+                                  value != null && value.isNotEmpty
+                                  ? null
+                                  : 'Required field',
                             ),
                           ),
                           const SizedBox(height: 16),
-                          SizedBox(
+                          Container(
                             width: 300,
                             child: TextFormField(
                               controller: _passwordController,
@@ -69,12 +69,10 @@ class _SignupPageState extends State<SignupPage> {
                               decoration: const InputDecoration(
                                 labelText: 'Password',
                               ),
-                              validator: (value) {
-                                if (value == null || value.length < 8) {
-                                  return 'Min 8 characters';
-                                }
-                                return null;
-                              },
+                              validator: (value) =>
+                                  value != null && value.length >= 8
+                                  ? null
+                                  : 'Min 8 characters',
                             ),
                           ),
                           const SizedBox(height: 24),
@@ -84,7 +82,7 @@ class _SignupPageState extends State<SignupPage> {
                               width: 100,
                               height: 50,
                               decoration: BoxDecoration(
-                                color: const Color(0xFF91D5D8),
+                                color: Color(0xFF91d5d8),
                                 borderRadius: BorderRadius.circular(25),
                               ),
                               child: const Center(
