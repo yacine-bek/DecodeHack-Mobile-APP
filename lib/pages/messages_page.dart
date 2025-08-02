@@ -11,11 +11,19 @@ class MessagesPage extends StatelessWidget {
     final groupes = UserManager().groupes;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Messages'),backgroundColor: Color(0xFF98ddd8),),
-      body:  Center(
+      appBar: AppBar(
+        title: const Text('Messages'),
+        backgroundColor: Color(0xFF98ddd8),
+      ),
+      body: Center(
         child: ListView.builder(
           itemCount: groupes.length,
-          itemBuilder: (context, index) => postsList[groupes[index]]!.chatTile(),
+          itemBuilder: (context, index) {
+            final post = postsList[groupes[index]];
+            if (post == null)
+              return const SizedBox.shrink(); // or any placeholder
+            return post.chatTile();
+          },
         ),
       ),
     );
