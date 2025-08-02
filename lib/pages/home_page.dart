@@ -17,6 +17,9 @@ class _HomePageState extends State<HomePage> {
   final PageController _pageController = PageController();
   int _currentIndex = 0;
 
+  static const Color _primaryColor = Color(0xFF98ddd8);
+  static const Color _textDarkGreen = Color.fromARGB(255, 10, 56, 0);
+
   void _onItemTapped(int index) {
     setState(() {
       _currentIndex = index;
@@ -35,7 +38,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  void _handleLogout() async {
+  Future<void> _handleLogout() async {
     final authBox = Hive.box('authBox');
     await authBox.clear();
 
@@ -49,10 +52,10 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildDrawerItem(String title, IconData icon, VoidCallback onTap) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16.0),
+      padding: const EdgeInsets.only(bottom: 16),
       child: ListTile(
         leading: Icon(icon, size: 29),
-        title: Text(title, style: TextStyle(fontSize: 22)),
+        title: Text(title, style: const TextStyle(fontSize: 22)),
         onTap: onTap,
       ),
     );
@@ -62,33 +65,28 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Color(0xFF98ddd8),
-        elevation: 4.0, 
+        backgroundColor: _primaryColor,
+        elevation: 4,
         title: const Text(
           "Ecology App",
-          style: TextStyle(color: Color.fromARGB(255, 10, 56, 0)),
+          style: TextStyle(color: _textDarkGreen),
         ),
         actions: [
           IconButton(
-            icon: const Icon(
-              Icons.chat_bubble_outline,
-              color: Color.fromARGB(255, 10, 56, 0),
-            ),
+            icon: const Icon(Icons.chat_bubble_outline, color: _textDarkGreen),
             onPressed: _navigateToMessages,
           ),
         ],
       ),
-
       drawer: Drawer(
         surfaceTintColor: Colors.transparent,
-        backgroundColor: Color(0xFF98ddd8),
+        backgroundColor: _primaryColor,
         width: 250,
         child: SafeArea(
           child: Column(
             children: [
-              Container(
-                padding: EdgeInsets.all(16),
-                alignment: Alignment.center,
+              Padding(
+                padding: const EdgeInsets.all(16),
                 child: Image.asset("assets/images/logo.png", width: 150),
               ),
               Expanded(
@@ -111,12 +109,12 @@ class _HomePageState extends State<HomePage> {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           behavior: SnackBarBehavior.floating,
-                          backgroundColor: Color(0xFF91d5d8),
-                          content: Text(
+                          backgroundColor: const Color(0xFF91d5d8),
+                          content: const Text(
                             "Donation clicked",
                             style: TextStyle(color: Colors.black),
                           ),
-                          margin: EdgeInsets.all(16),
+                          margin: const EdgeInsets.all(16),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
@@ -134,7 +132,6 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
       ),
-
       body: PageView(
         controller: _pageController,
         onPageChanged: (index) => setState(() => _currentIndex = index),
@@ -142,18 +139,17 @@ class _HomePageState extends State<HomePage> {
       ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          color: const Color(0xFF98ddd8),
+          color: _primaryColor,
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.2),
               blurRadius: 8,
-              offset: const Offset(0, -2), 
+              offset: const Offset(0, -2),
             ),
           ],
         ),
         child: BottomNavigationBar(
-          backgroundColor:
-              Colors.transparent,
+          backgroundColor: Colors.transparent,
           elevation: 0,
           currentIndex: _currentIndex,
           onTap: _onItemTapped,

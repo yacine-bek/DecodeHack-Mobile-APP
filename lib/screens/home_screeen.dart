@@ -1,7 +1,7 @@
 import 'dart:io';
-import 'package:eco_system_things/classes/Post.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:eco_system_things/classes/Post.dart';
 import 'package:eco_system_things/classes/Manager.dart';
 import 'package:eco_system_things/classes/UserManager.dart';
 
@@ -33,12 +33,10 @@ class _HomeScreenState extends State<HomeScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      builder: (_) => _AddEntryForm(
-        onPostAdded: () {
-          Navigator.pop(context); 
-          _refreshPosts(); 
-        },
-      ),
+      builder: (_) => _AddEntryForm(onPostAdded: () {
+        Navigator.pop(context);
+        _refreshPosts();
+      }),
     );
   }
 
@@ -57,7 +55,7 @@ class _HomeScreenState extends State<HomeScreen> {
         floatingActionButton: FloatingActionButton(
           backgroundColor: Colors.white,
           onPressed: _openAddEntrySheet,
-          shape: const CircleBorder(), 
+          shape: const CircleBorder(),
           child: const Icon(Icons.add, color: Colors.black),
         ),
       ),
@@ -85,6 +83,18 @@ class _AddEntryFormState extends State<_AddEntryForm> {
   final _difficulties = ['Easy', 'Medium', 'Hard'];
   final _pollutionTypes = ['Air', 'Water', 'Soil', 'Visual'];
 
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: const Color(0xFFDD6060),
+        content: Text(message, style: const TextStyle(color: Colors.black)),
+        margin: const EdgeInsets.all(16),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      ),
+    );
+  }
+
   Future<void> _pickImage(ImageSource source) async {
     final picked = await ImagePicker().pickImage(
       source: source,
@@ -99,23 +109,8 @@ class _AddEntryFormState extends State<_AddEntryForm> {
     final title = _titleController.text.trim();
     final desc = _descriptionController.text.trim();
 
-    if (title.isEmpty ||
-        desc.isEmpty ||
-        _difficulty == null ||
-        _pollutionType == null ||
-        _imageFile == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          behavior: SnackBarBehavior.floating,
-          backgroundColor: Color.fromARGB(255, 221, 96, 96),
-          content: Text(
-            'All fields are required',
-            style: TextStyle(color: Colors.black),
-          ),
-          margin: EdgeInsets.all(16),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        ),
-      );
+    if (title.isEmpty || desc.isEmpty || _difficulty == null || _pollutionType == null || _imageFile == null) {
+      _showError('All fields are required');
       return;
     }
 
@@ -123,41 +118,19 @@ class _AddEntryFormState extends State<_AddEntryForm> {
 
     final imageUrl = await Manager().uploadImageToCloudinary(_imageFile!);
     if (imageUrl == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          behavior: SnackBarBehavior.floating,
-          backgroundColor: Color(0xFF91d5d8),
-          content: Text(
-            'Image upload failed. Try again.',
-            style: TextStyle(color: Colors.black),
-          ),
-          margin: EdgeInsets.all(16),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        ),
-      );
+      _showError('Image upload failed. Try again.');
       setState(() => _isSubmitting = false);
       return;
     }
 
     final location = await UserManager().getCurrentLocation();
     if (location == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          behavior: SnackBarBehavior.floating,
-          backgroundColor: Color.fromARGB(255, 221, 96, 96),
-          content: Text(
-            "Location not available. Enable location and try again.",
-            style: TextStyle(color: Colors.black),
-          ),
-          margin: EdgeInsets.all(16),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        ),
-      );
+      _showError("Location not available. Enable location and try again.");
       setState(() => _isSubmitting = false);
       return;
     }
 
-    UserManager().addPost(
+    await UserManager().addPost(
       difLVL: _difficulty!,
       polutionType: _pollutionType!,
       title: title,
@@ -179,10 +152,7 @@ class _AddEntryFormState extends State<_AddEntryForm> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
-              "New Post",
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
+            const Text("New Post", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
             const SizedBox(height: 12),
             TextField(
               controller: _titleController,
@@ -197,18 +167,14 @@ class _AddEntryFormState extends State<_AddEntryForm> {
             const SizedBox(height: 8),
             DropdownButtonFormField<String>(
               value: _difficulty,
-              items: _difficulties
-                  .map((d) => DropdownMenuItem(value: d, child: Text(d)))
-                  .toList(),
+              items: _difficulties.map((d) => DropdownMenuItem(value: d, child: Text(d))).toList(),
               onChanged: (val) => setState(() => _difficulty = val),
               decoration: const InputDecoration(labelText: "Difficulty"),
             ),
             const SizedBox(height: 8),
             DropdownButtonFormField<String>(
               value: _pollutionType,
-              items: _pollutionTypes
-                  .map((p) => DropdownMenuItem(value: p, child: Text(p)))
-                  .toList(),
+              items: _pollutionTypes.map((p) => DropdownMenuItem(value: p, child: Text(p))).toList(),
               onChanged: (val) => setState(() => _pollutionType = val),
               decoration: const InputDecoration(labelText: "Pollution Type"),
             ),
@@ -220,40 +186,8 @@ class _AddEntryFormState extends State<_AddEntryForm> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                GestureDetector(
-                  onTap: () => _pickImage(ImageSource.camera),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(25),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Row(
-                        children: [
-                          Icon(Icons.camera_alt, size: 32),
-                          Text("Camera", style: TextStyle(fontSize: 20)),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                GestureDetector(
-                  onTap: () => _pickImage(ImageSource.gallery),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(25),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Row(
-                        children: [
-                          Icon(Icons.photo_library, size: 32),
-                          Text("Gallery", style: TextStyle(fontSize: 20)),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
+                _buildIconBtn(Icons.camera_alt, "Camera", () => _pickImage(ImageSource.camera)),
+                _buildIconBtn(Icons.photo_library, "Gallery", () => _pickImage(ImageSource.gallery)),
               ],
             ),
             const SizedBox(height: 24),
@@ -261,20 +195,32 @@ class _AddEntryFormState extends State<_AddEntryForm> {
               onTap: _isSubmitting ? null : _submit,
               child: Container(
                 decoration: BoxDecoration(
-                  color: Color(0xFFc3ece8),
+                  color: const Color(0xFFc3ece8),
                   borderRadius: BorderRadius.circular(25),
                 ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 8,
-                  ),
-                  child: _isSubmitting
-                      ? const CircularProgressIndicator()
-                      : const Text("Submit", style: TextStyle(fontSize: 24)),
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                child: _isSubmitting
+                    ? const CircularProgressIndicator()
+                    : const Text("Submit", style: TextStyle(fontSize: 24)),
               ),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildIconBtn(IconData icon, String label, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(borderRadius: BorderRadius.circular(25)),
+        child: Row(
+          children: [
+            Icon(icon, size: 28),
+            const SizedBox(width: 8),
+            Text(label, style: const TextStyle(fontSize: 18)),
           ],
         ),
       ),

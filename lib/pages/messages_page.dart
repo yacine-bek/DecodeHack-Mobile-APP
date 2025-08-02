@@ -15,16 +15,13 @@ class MessagesPage extends StatelessWidget {
         title: const Text('Messages'),
         backgroundColor: Color(0xFF98ddd8),
       ),
-      body: Center(
-        child: ListView.builder(
-          itemCount: groupes.length,
-          itemBuilder: (context, index) {
-            final post = postsList[groupes[index]];
-            if (post == null)
-              return const SizedBox.shrink();
-            return post.chatTile();
-          },
-        ),
+      body: ListView.builder(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        itemCount: groupes.length,
+        itemBuilder: (context, index) {
+          final post = postsList[groupes[index]];
+          return post?.chatTile() ?? const SizedBox.shrink();
+        },
       ),
     );
   }

@@ -13,39 +13,29 @@ class Manager {
   Manager._internal();
 
   final DatabaseReference dbRef = UserManager().dbRef;
-
   final Map<String, Post> posts = {};
 
-  void addPost(Post post) {
-    posts[post.id] = post;
-  }
+  void addPost(Post post) => posts[post.id] = post;
 
-  Post? getPostById(String id) {
-    return posts[id];
-  }
+  Post? getPostById(String id) => posts[id];
 
-  void removePost(String id) {
-    posts.remove(id);
-  }
+  void removePost(String id) => posts.remove(id);
 
-  List<Post> getAllPosts() {
-    return posts.values.toList();
-  }
+  List<Post> getAllPosts() => posts.values.toList();
 
   Future<void> fetchAndAddNewPosts() async {
     final snapshot = await dbRef.child('posts').get();
 
-    if (snapshot.exists) {
-      final data = Map<String, dynamic>.from(snapshot.value as Map);
+    if (!snapshot.exists) return;
 
-      data.forEach((key, value) {
-        final postMap = Map<String, dynamic>.from(value);
-        final postId = postMap['post_id'];
+    final data = Map<String, dynamic>.from(snapshot.value as Map);
 
-        if (!posts.containsKey(postId)) {
-          posts[postId] = Post.fromJson(postMap);
-        }
-      });
+    for (var entry in data.entries) {
+      final postMap = Map<String, dynamic>.from(entry.value);
+      final postId = postMap['post_id'];
+      if (postId != null && !posts.containsKey(postId)) {
+        posts[postId] = Post.fromJson(postMap);
+      }
     }
   }
 
@@ -59,29 +49,18 @@ class Manager {
 
     final originalBytes = await imageFile.readAsBytes();
     final decodedImage = img.decodeImage(originalBytes);
+    if (decodedImage == null) return null;
 
-    if (decodedImage == null) {
-      return null;
-    }
-
-    final resizedImage = img.copyResize(
-      decodedImage,
-      width: 800,
-    ); 
-    final compressedJpg = img.encodeJpg(
-      resizedImage,
-      quality: 60,
-    ); 
+    final resized = img.copyResize(decodedImage, width: 800);
+    final compressed = img.encodeJpg(resized, quality: 60);
 
     final tempDir = await getTemporaryDirectory();
     final compressedFile = File('${tempDir.path}/compressed.jpg')
-      ..writeAsBytesSync(compressedJpg);
+      ..writeAsBytesSync(compressed);
 
     final request = http.MultipartRequest('POST', uploadUrl)
       ..fields['upload_preset'] = uploadPreset
-      ..files.add(
-        await http.MultipartFile.fromPath('file', compressedFile.path),
-      );
+      ..files.add(await http.MultipartFile.fromPath('file', compressedFile.path));
 
     final response = await request.send();
 
@@ -89,10 +68,9 @@ class Manager {
       final resBody = await response.stream.bytesToString();
       final jsonResponse = json.decode(resBody);
       return jsonResponse['secure_url'];
-    } else {
-      final errorBody = await response.stream.bytesToString();
-      return null;
     }
+
+    return null;
   }
 
   Future<File?> downloadImageFromUrl(String url, String savePath) async {
@@ -101,8 +79,7 @@ class Manager {
       final file = File(savePath);
       await file.writeAsBytes(response.bodyBytes);
       return file;
-    } else {
-      return null;
     }
+    return null;
   }
 }

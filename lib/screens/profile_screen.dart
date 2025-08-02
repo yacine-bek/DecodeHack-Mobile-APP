@@ -1,8 +1,8 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:eco_system_things/classes/UserManager.dart';
 import 'package:eco_system_things/classes/Manager.dart';
-import 'dart:io';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -12,10 +12,9 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  final TextEditingController _firstNameController = TextEditingController();
-  final TextEditingController _lastNameController = TextEditingController();
-  final TextEditingController _wilayaController = TextEditingController();
-
+  final _firstNameController = TextEditingController();
+  final _lastNameController = TextEditingController();
+  final _wilayaController = TextEditingController();
   final ImagePicker _picker = ImagePicker();
 
   @override
@@ -27,55 +26,42 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _wilayaController.text = user.wilaya;
   }
 
+  void _showSnackBar(String message, {bool success = false}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: success ? const Color(0xFF91d5d8) : const Color(0xFFDD6060),
+        content: Text(message, style: const TextStyle(color: Colors.black)),
+        margin: const EdgeInsets.all(16),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      ),
+    );
+  }
+
   Future<void> _pickImage(ImageSource source) async {
     final picked = await _picker.pickImage(source: source, imageQuality: 70);
-    if (picked != null) {
-      final imageFile = File(picked.path);
-      final url = await Manager().uploadImageToCloudinary(imageFile);
+    if (picked == null) return;
 
-      if (url != null && url.isNotEmpty) {
-        final user = UserManager();
-        final success = await user.updateUserProfile(
-          firstName: user.firstName,
-          lastName: user.lastName,
-          wilaya: user.wilaya,
-          pfpUrl: url,
-        );
+    final imageFile = File(picked.path);
+    final url = await Manager().uploadImageToCloudinary(imageFile);
 
-        if (success) {
-          setState(() {});
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              behavior: SnackBarBehavior.floating,
-              backgroundColor: Color.fromARGB(255, 221, 96, 96),
-              content: Text(
-                'Failed to update profile image',
-                style: TextStyle(color: Colors.black),
-              ),
-              margin: EdgeInsets.all(16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-          );
-        }
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            behavior: SnackBarBehavior.floating,
-            backgroundColor: Color.fromARGB(255, 221, 96, 96),
-            content: Text(
-              'Image upload failed',
-              style: TextStyle(color: Colors.black),
-            ),
-            margin: EdgeInsets.all(16),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-          ),
-        );
-      }
+    if (url == null || url.isEmpty) {
+      _showSnackBar('Image upload failed');
+      return;
+    }
+
+    final user = UserManager();
+    final success = await user.updateUserProfile(
+      firstName: user.firstName,
+      lastName: user.lastName,
+      wilaya: user.wilaya,
+      pfpUrl: url,
+    );
+
+    if (success) {
+      setState(() {});
+    } else {
+      _showSnackBar('Failed to update profile image');
     }
   }
 
@@ -85,18 +71,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final wilaya = _wilayaController.text.trim();
 
     if (firstName.isEmpty || lastName.isEmpty || wilaya.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          behavior: SnackBarBehavior.floating,
-          backgroundColor: Color.fromARGB(255, 221, 96, 96),
-          content: Text(
-            'All fields are required',
-            style: TextStyle(color: Colors.black),
-          ),
-          margin: EdgeInsets.all(16),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        ),
-      );
+      _showSnackBar('All fields are required');
       return;
     }
 
@@ -109,29 +84,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
 
     if (success) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          behavior: SnackBarBehavior.floating,
-          backgroundColor: Color(0xFF91d5d8),
-          content: Text('Profile saved', style: TextStyle(color: Colors.black)),
-          margin: EdgeInsets.all(16),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        ),
-      );
+      _showSnackBar('Profile saved', success: true);
       setState(() {});
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          behavior: SnackBarBehavior.floating,
-          backgroundColor:  Color.fromARGB(255, 221, 96, 96),
-          content: Text(
-            'Failed to save profile',
-            style: TextStyle(color: Colors.black),
-          ),
-          margin: EdgeInsets.all(16),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        ),
-      );
+      _showSnackBar('Failed to save profile');
     }
   }
 
@@ -150,9 +106,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 CircleAvatar(
                   radius: 60,
                   backgroundColor: Colors.grey[200],
-                  backgroundImage: user.pfp.isNotEmpty
-                      ? NetworkImage(user.pfp)
-                      : null,
+                  backgroundImage: user.pfp.isNotEmpty ? NetworkImage(user.pfp) : null,
                   child: user.pfp.isEmpty
                       ? const Icon(Icons.person, size: 60, color: Colors.grey)
                       : null,
@@ -161,28 +115,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   bottom: 4,
                   right: 4,
                   child: PopupMenuButton<ImageSource>(
-                    color: Color(0xFF91d5d8),
-
+                    color: const Color(0xFF91d5d8),
                     icon: const Icon(Icons.edit, color: Colors.white),
                     onSelected: _pickImage,
                     itemBuilder: (context) => const [
-                      PopupMenuItem(
-                        value: ImageSource.camera,
-                        child: Text('Take Photo'),
-                      ),
-                      PopupMenuItem(
-                        value: ImageSource.gallery,
-                        child: Text('Choose from Gallery'),
-                      ),
+                      PopupMenuItem(value: ImageSource.camera, child: Text('Take Photo')),
+                      PopupMenuItem(value: ImageSource.gallery, child: Text('Choose from Gallery')),
                     ],
                   ),
                 ),
               ],
             ),
-
             const SizedBox(height: 24),
-
-
             TextField(
               controller: _firstNameController,
               decoration: const InputDecoration(labelText: 'First Name'),
@@ -198,29 +142,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
               decoration: const InputDecoration(labelText: 'Wilaya'),
             ),
             const SizedBox(height: 24),
-
             GestureDetector(
               onTap: _saveProfile,
               child: Container(
+                width: 150,
+                padding: const EdgeInsets.symmetric(vertical: 10),
                 decoration: BoxDecoration(
-                  color: Color(0xFFc3ece8),
+                  color: const Color(0xFFc3ece8),
                   borderRadius: BorderRadius.circular(24),
                 ),
-                width: 150,
-                child: Center(
-                  child: Padding(
-                    padding: const EdgeInsets.only(right: 8.0, left: 8),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.save),
-                        Center(child: SizedBox(width: 8)),
-                        Center(
-                          child: Text("Save", style: TextStyle(fontSize: 24)),
-                        ),
-                      ],
-                    ),
-                  ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: const [
+                    Icon(Icons.save),
+                    SizedBox(width: 8),
+                    Text("Save", style: TextStyle(fontSize: 24)),
+                  ],
                 ),
               ),
             ),
