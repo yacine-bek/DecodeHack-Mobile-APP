@@ -21,7 +21,7 @@ class MessagesPage extends StatelessWidget {
           itemBuilder: (context, index) {
             final post = postsList[groupes[index]];
             if (post == null)
-              return const SizedBox.shrink(); // or any placeholder
+              return const SizedBox.shrink();
             return post.chatTile();
           },
         ),

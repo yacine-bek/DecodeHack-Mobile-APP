@@ -93,9 +93,7 @@ class _SecondSignupPageState extends State<SecondSignupPage> {
 
     if (_imageFile != null) {
       try {
-        print("Uploading image...");
         pfpUrl = await Manager().uploadImageToCloudinary(_imageFile!);
-        print("Image uploaded: $pfpUrl");
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -117,7 +115,6 @@ class _SecondSignupPageState extends State<SecondSignupPage> {
     }
 
     try {
-      print("Signing up user...");
       await UserManager().signUp(
         user: widget.email,
         password: widget.password,
@@ -126,14 +123,12 @@ class _SecondSignupPageState extends State<SecondSignupPage> {
         pfp: pfpUrl ?? '',
         wilaya: _selectedWilaya!,
       );
-      print("Signup successful. Navigating to HomePage...");
 
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => const HomePage()),
       );
     } catch (e) {
-      print("Signup failed: $e");
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           behavior: SnackBarBehavior.floating,

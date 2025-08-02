@@ -187,19 +187,14 @@ class UserManager {
           .child("users/$safeUserId")
           .get();
       if (snapshot.exists) {
-        print("User data found: ${snapshot.value}");
       } else {
-        print("User not found at users/$safeUserId");
       }
     } catch (e) {
-      print("Error fetching user data: $e");
     }
 
     try {
       await dbRef.child("posts").child(id).set(postData);
-      print("Post added successfully");
     } catch (e) {
-      print("Error adding post: $e");
     }
 
     final newPost = Post(
@@ -246,9 +241,8 @@ class UserManager {
           .child(postId)
           .set(true);
 
-      print("User $safeUserId added to post $postId members.");
     } catch (e) {
-      print("Failed to add user to members: $e");
+
     }
     if (!groupes.contains(postId)) {
       groupes.add(postId);
@@ -258,7 +252,6 @@ class UserManager {
   Future<Position?> getCurrentLocation() async {
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
-      print('Location services are disabled.');
       await Geolocator.openLocationSettings(); 
       return null;
     }
@@ -268,14 +261,13 @@ class UserManager {
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
-        print('Location permission denied.');
+        
         await Geolocator.openAppSettings(); 
         return null;
       }
     }
 
     if (permission == LocationPermission.deniedForever) {
-      print('Location permission permanently denied.');
       await Geolocator.openAppSettings(); 
       return null;
     }
@@ -284,7 +276,6 @@ class UserManager {
       desiredAccuracy: LocationAccuracy.high,
     );
 
-    print('Lat: ${position.latitude}, Lon: ${position.longitude}');
     return position;
   }
 }

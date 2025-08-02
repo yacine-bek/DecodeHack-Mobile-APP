@@ -61,7 +61,6 @@ class Manager {
     final decodedImage = img.decodeImage(originalBytes);
 
     if (decodedImage == null) {
-      print("Failed to decode image");
       return null;
     }
 
@@ -92,8 +91,6 @@ class Manager {
       return jsonResponse['secure_url'];
     } else {
       final errorBody = await response.stream.bytesToString();
-      print('Upload failed: ${response.statusCode}');
-      print('Error details: $errorBody');
       return null;
     }
   }
@@ -105,7 +102,6 @@ class Manager {
       await file.writeAsBytes(response.bodyBytes);
       return file;
     } else {
-      print('Download failed: ${response.statusCode}');
       return null;
     }
   }
